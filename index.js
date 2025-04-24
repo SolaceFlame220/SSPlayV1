@@ -21,7 +21,7 @@ let oauth2Client;
 let youtube;
 
 async function authorize() {
-  const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+  const credentials = JSON.parse(process.env.CREDENTIALS_JSON);
   const { client_id, client_secret, redirect_uris } = credentials.installed;
   oauth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
