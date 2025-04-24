@@ -15,6 +15,5 @@
   "googleapis": "^148.0.0",
   "open": "^10.1.1",
   "openai": "^4.95.1",
-  "express-openid-connect": "2.8.0"
  }
 }
