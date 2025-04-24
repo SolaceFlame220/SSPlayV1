@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Load client secrets from a local file
 const CREDENTIALS_PATH = "/etc/secrets/credentials.json";
-const TOKEN_PATH = path.join(__dirname, 'token.json');
+const TOKEN_PATH = "/etc/secrets/token.json";
 const SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl'];
 
 function authorize() {
