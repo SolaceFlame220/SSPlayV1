@@ -6,54 +6,44 @@
   <title>SS Playlist Generator</title>
   <style>
     body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background-color: #000;
-  color: #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  justify-content: center;
-  padding: 20px;
-}
-
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #000;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     form {
       max-width: 600px;
       width: 100%;
-      background-color: #111;
-      padding: 20px 10px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00ffcc33;
     }
-
+    input, textarea, button {
+      width: 100%;
+    }
     h1 {
       color: #00ffcc;
       text-align: center;
     }
-
-    label {
+    label, input, textarea {
       display: block;
-      margin-bottom: 8px;
+      width: 100%;
+      margin-bottom: 20px;
       font-size: 16px;
     }
-
-    input[type="text"], textarea {
+    textarea {
+      height: 120px;
       background-color: #1e1e1e;
       color: #ffffff;
       border: 1px solid #555;
       padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      width: 100%;
-      box-sizing: border-box;
-      margin-bottom: 20px;
     }
-
-    textarea {
-      height: 120px;
+    input[type="text"] {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #555;
+      padding: 10px;
     }
-
     button {
       background-color: #00ffcc;
       color: black;
@@ -61,23 +51,28 @@
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
-      border-radius: 5px;
-      width: 100%;
     }
-
     button:hover {
       background-color: #00e6b8;
     }
-
     .footer {
-  margin-top: 20px;
-  font-size: 14px;
-  color: #888;
-  text-align: center;
-}
-
-    #result {
-      margin-top: 20px;
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
+    }
+    .spinner {
+      border: 4px solid #333;
+      border-top: 4px solid #00ffcc;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -87,19 +82,19 @@
 
   <form id="playlistForm">
     <label for="title">Playlist Title</label>
-    <input type="text" id="title" name="title" placeholder="Name your Playlist, but make it cool." required />
+    <input type="text" id="title" name="title" placeholder="Name your playlist..." required />
 
     <label for="content">Playlist Content (Paste your list):</label>
-    <textarea id="content" name="content" placeholder="Paste or type your list here. *Tip: ask your AI to make a list to match your vibe*"></textarea>
+    <textarea id="content" name="content" placeholder="Paste your list here. *Tip: ask your AI to match your vibe*"></textarea>
 
     <button type="submit">Generate</button>
   </form>
 
-  <div id="result"></div>
+  <div id="result" style="margin-top: 20px;"></div>
 
   <div class="footer">
     ✨ Built by SS "ShortStroke & Solace" • SS Playlist Generator v1.1<br>
-    <span style="font-size: 12px;">for Ellie & the Vibe Keepers of the World</span>
+    <span style="font-size: 12px;">for Ellie & the vibe keepers of the world</span>
   </div>
 
   <script>
@@ -107,20 +102,26 @@
       e.preventDefault();
       const title = document.getElementById('title').value;
       const content = document.getElementById('content').value;
-
-      const response = await fetch('/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content })
-      });
-
       const resultDiv = document.getElementById('result');
-      if (response.ok) {
-        const data = await response.json();
-        resultDiv.innerHTML = `<p><strong>Playlist Link Generated CLICK LINK:</strong> <a href="${data.playlistURL}" target="_blank">${data.playlistURL}</a></p>`;
-      } else {
-        const err = await response.text();
-        resultDiv.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+
+      resultDiv.innerHTML = `<div class="spinner"></div><p style="color:#00ffcc; text-align:center;">Generating your playlist... please wait ⏳</p>`;
+
+      try {
+        const response = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          resultDiv.innerHTML = `<p><strong>✅ Playlist Generated:</strong> <a href="${data.playlistURL}" target="_blank">${data.playlistURL}</a></p>`;
+        } else {
+          const err = await response.text();
+          resultDiv.innerHTML = `<p style="color:red;">❌ Error: ${err}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p style="color:red;">⚠️ Unexpected error. Please try again later.</p>`;
       }
     });
   </script>
