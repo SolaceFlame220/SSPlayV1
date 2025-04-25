@@ -8,87 +8,66 @@
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
-      background-color: #f9f9f9;
-      color: #333;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
     }
     h1 {
-      color: #111;
+      color: #a6dcef;
     }
-    form {
-      margin-top: 20px;
-    }
-    input, textarea, select, button {
+    label, select, input, textarea {
+      display: block;
+      margin-bottom: 20px;
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+    }
+    textarea {
+      height: 100px;
     }
     button {
-      background-color: #4CAF50;
+      background-color: #28a745;
       color: white;
       border: none;
+      padding: 10px 20px;
       cursor: pointer;
     }
     button:hover {
-      background-color: #45a049;
-    }
-    .result {
-      margin-top: 20px;
-    }
-    .error {
-      color: red;
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
-  <h1>🎵 SSGen Playlist Generator</h1>
+  <h1>SSGen Playlist Generator</h1>
+
   <form id="playlistForm">
-    <label for="mode">Generation Mode:</label>
-    <select id="mode" name="mode">
-      <option value="manual">Manual (Paste Songs)</option>
-      <option value="vibe">Vibe (Describe the Mood)</option>
-    </select>
-
     <label for="title">Playlist Title:</label>
-    <input type="text" id="title" name="title" required />
+    <input type="text" id="title" name="title" placeholder="Enter playlist title..." required />
 
-    <label for="content">Playlist Content (songs or vibe):</label>
-    <textarea id="content" name="content" rows="6" placeholder="Enter song list or describe the vibe..." required></textarea>
+    <label for="content">Playlist Content (Paste Song List):</label>
+    <textarea id="content" name="content" placeholder="Enter song list..."></textarea>
 
     <button type="submit">Generate Playlist</button>
   </form>
 
-  <div class="result" id="result"></div>
+  <div id="result" style="margin-top: 20px;"></div>
 
   <script>
-    const form = document.getElementById('playlistForm');
-    const resultDiv = document.getElementById('result');
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('playlistForm').addEventListener('submit', async function (e) {
       e.preventDefault();
-      resultDiv.textContent = '⏳ Generating your playlist...';
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
 
-      const mode = document.getElementById('mode').value;
-      const title = document.getElementById('title').value.trim();
-      const content = document.getElementById('content').value.trim();
+      const response = await fetch('/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content })
+      });
 
-      try {
-        const res = await fetch('/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode, title, content }),
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.playlistURL) {
-          resultDiv.innerHTML = `✅ <a href="${data.playlistURL}" target="_blank">Your playlist is ready. Click here to open it on YouTube!</a>`;
-        } else {
-          resultDiv.innerHTML = `<span class="error">❌ Something went wrong: ${data.error || 'Unknown error'}</span>`;
-        }
-      } catch (err) {
-        resultDiv.innerHTML = `<span class="error">❌ Error: ${err.message}</span>`;
+      const resultDiv = document.getElementById('result');
+      if (response.ok) {
+        const data = await response.json();
+        resultDiv.innerHTML = `<p><strong>Playlist Generated:</strong> <a href="${data.playlistURL}" target="_blank">${data.playlistURL}</a></p>`;
+      } else {
+        const err = await response.text();
+        resultDiv.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
       }
     });
   </script>

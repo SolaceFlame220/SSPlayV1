@@ -3,16 +3,16 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 const path = require('path');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
 
-const CREDENTIALS_PATH = '/etc/secrets/credentials.json';
-const TOKEN_PATH = '/etc/secrets/token.json';
+// Load client secrets from a local file
+const CREDENTIALS_PATH = "/etc/secrets/credentials.json";
+const TOKEN_PATH = "/etc/secrets/token.json";
 const SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl'];
 
 function authorize() {
@@ -28,16 +28,18 @@ function authorize() {
 
 const youtube = google.youtube({ version: 'v3', auth: authorize() });
 
-app.post('/generate', async (req, res) => {
-  const { content, title, mode } = req.body;
+app.use(express.json());
 
-  if (!content || !title) {
-    return res.status(400).send('Missing playlist content or title');
+app.post('/generate', async (req, res) => {
+  const { content, title } = req.body;
+
+  if (!content) {
+    return res.status(400).send('Missing content');
   }
 
   const lines = content
     .split('\n')
-    .map(line => line.replace(/^[\d.\-\)]*/, '').trim())
+    .map(line => line.replace(/^[0-9]+[.)]?/, '').trim())
     .filter(Boolean);
 
   const videoIds = [];
@@ -55,7 +57,6 @@ app.post('/generate', async (req, res) => {
       if (items.length > 0) {
         videoIds.push(items[0].id.videoId);
       }
-      if (videoIds.length >= 20) break; // Stop at 20 max
     } catch (error) {
       console.error(`YouTube search failed for "${line}":`, error);
     }
@@ -65,45 +66,12 @@ app.post('/generate', async (req, res) => {
     return res.status(500).send('No videos found');
   }
 
-  try {
-    const playlistResponse = await youtube.playlists.insert({
-      part: ['snippet', 'status'],
-      requestBody: {
-        snippet: {
-          title: title,
-          description: `Generated with SSGen 💽 by ShortStroke + Solace.`,
-        },
-        status: {
-          privacyStatus: 'private',
-        },
-      },
-    });
+  const playlistUrl = `https://www.youtube.com/watch_videos?video_ids=${videoIds.join(',')}`;
 
-    const playlistId = playlistResponse.data.id;
-
-    for (const videoId of videoIds) {
-      await youtube.playlistItems.insert({
-        part: ['snippet'],
-        requestBody: {
-          snippet: {
-            playlistId,
-            resourceId: {
-              kind: 'youtube#video',
-              videoId,
-            },
-          },
-        },
-      });
-    }
-
-    const playlistURL = `https://www.youtube.com/playlist?list=${playlistId}`;
-    res.json({ playlistURL });
-  } catch (err) {
-    console.error('Failed to create playlist:', err);
-    res.status(500).send('Error creating playlist');
-  }
+  res.json({ playlistURL: playlistUrl });
 });
 
+// Fallback route for frontend
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
