@@ -16,30 +16,76 @@
     }
 
     form {
-      max-width: 600px;
+      max-width: 500px;
       width: 100%;
-    }
-
-    input, textarea, button {
-      width: 100%;
+      padding: 20px;
     }
 
     h1 {
-      color: #00ffcc;
+      color: #00ffc8;
+      text-align: center;
+      font-size: 2em;
+    }
+
+    p {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input[type="text"], textarea {
+      background-color: #1e1e1e;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      background-color: #00ffc8;
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #00e6b8;
+    }
+
+    #result {
+      margin-top: 20px;
       text-align: center;
     }
 
-    label, input, textarea {
-      display: block;
-      width: 100%;
-      margin-bottom: 20px;
-      font-size: 16px;
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
     }
   </style>
 </head>
 <body>
   <h1>🎵 SS Playlist Generator</h1>
-  <p style="text-align: center;">Copy and paste your list of songs to generate a YouTube playlist:</p>
+  <p>Copy and paste your list of songs to generate a YouTube playlist:</p>
 
   <form id="playlistForm">
     <label for="title">Playlist Title</label>
@@ -51,10 +97,10 @@
     <button type="submit">Generate</button>
   </form>
 
-  <div id="result" style="margin-top: 20px;"></div>
+  <div id="result"></div>
 
   <div class="footer">
-    ✨ Built by SS "ShortStroke & Solace" • SS Playlist Generator v1.1<br>
+    ✨ Built by SS "ShortStroke & Solace" • SS Playlist Generator v1.1<br />
     <span style="font-size: 12px;">for Ellie & the vibe keepers of the world</span>
   </div>
 
