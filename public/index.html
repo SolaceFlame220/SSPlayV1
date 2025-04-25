@@ -117,7 +117,7 @@
       const resultDiv = document.getElementById('result');
       if (response.ok) {
         const data = await response.json();
-        resultDiv.innerHTML = `<p><strong>Playlist Generated:</strong> <a href="${data.playlistURL}" target="_blank">${data.playlistURL}</a></p>`;
+        resultDiv.innerHTML = `<p><strong>Playlist Link Generated CLICK LINK:</strong> <a href="${data.playlistURL}" target="_blank">${data.playlistURL}</a></p>`;
       } else {
         const err = await response.text();
         resultDiv.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
