@@ -1,23 +1,24 @@
 const express = require('express');
 const fs = require('fs');
-const readline = require('readline');
 const { google } = require('googleapis');
 const path = require('path');
+const { OpenAI } = require('openai');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Load client secrets from a local file
-const CREDENTIALS_PATH = "/etc/secrets/credentials.json";
-const TOKEN_PATH = "/etc/secrets/token.json";
+// Load credentials and token paths
+const CREDENTIALS_PATH = '/etc/secrets/credentials.json';
+const TOKEN_PATH = '/etc/secrets/token.json';
 const SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl'];
 
+// Initialize OpenAI
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+// YouTube Auth
 function authorize() {
-  const content = fs.readFileSync(CREDENTIALS_PATH);
-  const credentials = JSON.parse(content);
+  const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
   const { client_secret, client_id, redirect_uris } = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
@@ -29,17 +30,20 @@ function authorize() {
 const youtube = google.youtube({ version: 'v3', auth: authorize() });
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
+// POST /generate
 app.post('/generate', async (req, res) => {
   const { content, title } = req.body;
 
-  if (!content) {
-    return res.status(400).send('Missing content');
+  if (!content || !title) {
+    return res.status(400).send('Missing title or content');
   }
 
+  // Parse list directly
   const lines = content
     .split('\n')
-    .map(line => line.replace(/^[0-9]+[.)]?/, '').trim())
+    .map(line => line.replace(/^[0-9]+[\).\-]?\s*/, '').trim())
     .filter(Boolean);
 
   const videoIds = [];
@@ -66,12 +70,48 @@ app.post('/generate', async (req, res) => {
     return res.status(500).send('No videos found');
   }
 
-  const playlistUrl = `https://www.youtube.com/watch_videos?video_ids=${videoIds.join(',')}`;
+  try {
+    // Create a playlist
+    const playlistResponse = await youtube.playlists.insert({
+      part: 'snippet,status',
+      requestBody: {
+        snippet: {
+          title: title,
+          description: 'Generated with SSGen • Powered by ShortStroke & Solace',
+        },
+        status: {
+          privacyStatus: 'private',
+        },
+      },
+    });
 
-  res.json({ playlistURL: playlistUrl });
+    const playlistId = playlistResponse.data.id;
+
+    // Add videos to playlist
+    for (const videoId of videoIds) {
+      await youtube.playlistItems.insert({
+        part: 'snippet',
+        requestBody: {
+          snippet: {
+            playlistId,
+            resourceId: {
+              kind: 'youtube#video',
+              videoId,
+            },
+          },
+        },
+      });
+    }
+
+    const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+    res.json({ playlistURL: playlistUrl });
+  } catch (error) {
+    console.error('Failed to create or populate playlist:', error);
+    res.status(500).send('Error creating playlist');
+  }
 });
 
-// Fallback route for frontend
+// Fallback route
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
