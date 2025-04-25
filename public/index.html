@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SS Playlist Generator</title>
+  <title>SS Playlist Generator (Web Edition)</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #111;
       color: #f5f5f5;
-      padding: 40px;
+      padding: 50px;
       text-align: center;
     }
 
@@ -19,10 +17,22 @@
       margin-bottom: 10px;
     }
 
-    input, textarea {
+    p {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      color: #ccc;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input#playlistTitle {
       width: 80%;
       padding: 12px;
-      margin: 10px 0;
+      margin-bottom: 20px;
       border-radius: 8px;
       border: 1px solid #333;
       background-color: #222;
@@ -31,8 +41,23 @@
     }
 
     textarea {
+      width: 80%;
+      padding: 14px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: #222;
+      color: #fff;
       resize: none;
-      height: 140px;
+      overflow-y: hidden;
+      min-height: 100px;
+      max-height: 60vh;
+      line-height: 1.4em;
+      margin-bottom: 24px;
+    }
+
+    textarea::placeholder {
+      color: #666;
     }
 
     button {
@@ -51,69 +76,106 @@
     }
 
     #result {
-      margin-top: 30px;
+      margin-top: 40px;
       font-weight: bold;
       font-size: 1.2em;
       color: #00ff99;
+      opacity: 0;
+      transition: opacity 0.4s ease;
       min-height: 60px;
+    }
+
+    #result.show {
+      opacity: 1;
     }
 
     .jet-ski-loading {
       font-size: 1.5em;
       color: #00ffcc;
       animation: skiSplash 1.2s ease-in-out infinite;
+      display: inline-block;
+      padding: 10px;
+      position: relative;
     }
 
     @keyframes skiSplash {
-      0% { transform: translateX(-10px); opacity: 0.4; }
-      50% { transform: translateX(10px); opacity: 1; }
-      100% { transform: translateX(-10px); opacity: 0.4; }
+      0%   { transform: translateX(-15px); opacity: 0.4; }
+      50%  { transform: translateX(15px); opacity: 1; }
+      100% { transform: translateX(-15px); opacity: 0.4; }
     }
 
-    footer {
-      margin-top: 60px;
-      color: #444;
-      font-size: 0.9em;
+    a {
+      color: #00ffcc;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <h1>🎵 SS Playlist Generator</h1>
-  <p>Type a vibe *or* paste a song list, then name and generate your YouTube playlist.</p>
+  <p>Enter your vibe or list of songs to generate a real YouTube playlist:</p>
 
   <form id="vibeForm" onsubmit="handleSubmit(event)">
     <input id="playlistTitle" type="text" placeholder="Optional: Name your playlist..." />
-    <textarea id="vibeInput" placeholder="Examples:
-Vibe: Summer Jet Ski Fire, Chill Mornings, Sad Cowboy Energy
 
-Manual list:
-Simple Man – Lynyrd Skynyrd
-Into the Mystic – Van Morrison
-The Weight – The Band"></textarea>
-    <button type="submit">Generate Playlist</button>
+    <textarea id="vibeInput" placeholder="Type a vibe like: Happy, Sad, Party, Sunrise Coffee, Alone but hopeful, or Road Trip energy
+I feel like a broken disco ball spinning in the void
+
+Or Type Across like this: Simple Man Lynyrd Skynyrd, The Weight – The Band, Into the Mystic, Van Morrison
+
+Or Paste a song list like:
+Simple Man,Lynyrd Skynyrd
+The Weight, The Band
+Into the Mystic – Van Morrison"></textarea>
+
+    <button type="submit">Generate</button>
   </form>
 
   <div id="result"></div>
 
-  <footer>
-    Built by SS ShortStroke + Solace • Version 1.2
-  </footer>
+  <hr style="margin: 60px auto; width: 40%; border-color: #222;" />
 
   <script>
-    async function handleSubmit(e) {
-      e.preventDefault();
-      const content = document.getElementById("vibeInput").value.trim();
-      const title = document.getElementById("playlistTitle").value.trim();
-      const result = document.getElementById("result");
+    window.onload = () => {
+      const textarea = document.getElementById("vibeInput");
+      textarea.focus();
 
-      if (!content) {
-        result.innerHTML = "❌ Please enter a vibe or list first.";
+      const autoResize = () => {
+        textarea.style.height = "auto";
+        textarea.style.height = Math.min(textarea.scrollHeight, window.innerHeight * 0.6) + "px";
+      };
+
+      textarea.addEventListener("input", autoResize);
+      autoResize();
+    };
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      generatePlaylist();
+    }
+
+    async function generatePlaylist() {
+      const vibeInput = document.getElementById("vibeInput");
+      const titleInput = document.getElementById("playlistTitle");
+      const resultDiv = document.getElementById("result");
+
+      const input = vibeInput.value.trim();
+      const title = titleInput.value.trim();
+
+      if (!input) {
+        resultDiv.innerHTML = "❌ Please enter something first.";
+        resultDiv.classList.add("show");
         return;
       }
 
-      const isList = content.includes('\n') || content.includes(',') || content.includes('–');
+      const isList = input.includes('\n') || /^\d+[\.\)]/gm.test(input);
 
-      result.innerHTML = `<div class="jet-ski-loading">🌊 Creating your playlist…</div>`;
+      resultDiv.classList.remove("show");
+      resultDiv.innerHTML = `<div class="jet-ski-loading">🌊💨 Generating... hang tight.</div>`;
+      resultDiv.classList.add("show");
 
       try {
         const response = await fetch("/generate", {
@@ -121,26 +183,34 @@ The Weight – The Band"></textarea>
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             mode: isList ? "manual" : "vibe",
-            content,
-            title
+            content: input,
+            title: title || undefined
           })
         });
 
         const data = await response.json();
 
-        if (data.playlistURL) {
-          result.innerHTML = `
-            ✅ Playlist created:<br/>
-            <a href="${data.playlistURL}" target="_blank" style="color:#00ffcc;">🎧 Click to open it in YouTube</a>
-          `;
-        } else {
-          result.innerHTML = "⚠️ Something went wrong. Try again.";
-        }
+        resultDiv.innerHTML = `
+          <div style="margin-bottom: 16px;">✅ Playlist created from: <strong>${title || (isList ? "your list" : input)}</strong></div>
+          <div style="margin-bottom: 12px;">
+            <a href="${data.playlistURL}" target="_blank" style="font-size: 1.2em;">🎧 Click Here To Open Your Playlist</a>
+          </div>
+          <div style="color: #777; font-size: 0.9em;">📜 Tip: Click 'Save' in YouTube to keep this playlist in your Library.</div>
+        `;
+        resultDiv.classList.add("show");
+
+        vibeInput.value = "";
+        titleInput.value = "";
       } catch (err) {
-        console.error(err);
-        result.innerHTML = "🚫 Error creating playlist.";
+        console.error("⚠️ Playlist generation failed:", err);
+        resultDiv.innerHTML = "⚠️ Something went wrong. Try again.";
       }
     }
   </script>
+
+  <footer style="margin-top: 80px; font-size: 0.9em; color: #555;">
+    <p>🔧 Built by SS ShortStroke & Solace • SS Playlist Generator v1.2</p>
+    <p style="font-size: 0.8em; color: #333;">for Ellie & the vibe keepers of the world</p>
+  </footer>
 </body>
 </html>
