@@ -7,8 +7,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Load OAuth2 client and credentials
-the client credentials
+// Load OAuth2 client and token paths
 const CREDENTIALS_PATH = '/etc/secrets/credentials.json';
 const TOKEN_PATH = '/etc/secrets/token.json';
 const SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl'];
