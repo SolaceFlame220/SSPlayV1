@@ -3,51 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SSGen - Playlist Generator</title>
+  <title>SS Playlist Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #0f0f0f;
+      color: #ffffff;
       margin: 40px;
-      background-color: #1e1e1e;
-      color: #f0f0f0;
     }
     h1 {
-      color: #a6dcef;
+      color: #00ffcc;
+      text-align: center;
     }
-    label, select, input, textarea {
+    label, input, textarea {
       display: block;
-      margin-bottom: 20px;
       width: 100%;
+      margin-bottom: 20px;
+      font-size: 16px;
     }
     textarea {
-      height: 100px;
+      height: 120px;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #555;
+      padding: 10px;
+    }
+    input[type="text"] {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border: 1px solid #555;
+      padding: 10px;
     }
     button {
-      background-color: #28a745;
-      color: white;
+      background-color: #00ffcc;
+      color: black;
       border: none;
       padding: 10px 20px;
+      font-size: 16px;
       cursor: pointer;
+      display: block;
+      width: 100%;
     }
     button:hover {
-      background-color: #218838;
+      background-color: #00e6b8;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <h1>SSGen Playlist Generator</h1>
+  <h1>🎵 SS Playlist Generator</h1>
+  <p style="text-align: center;">Enter your vibe or list of songs to generate a real YouTube playlist:</p>
 
   <form id="playlistForm">
-    <label for="title">Playlist Title:</label>
-    <input type="text" id="title" name="title" placeholder="Enter playlist title..." required />
+    <label for="title">Playlist Title</label>
+    <input type="text" id="title" name="title" placeholder="Name your playlist..." required />
 
-    <label for="content">Playlist Content (Paste Song List):</label>
-    <textarea id="content" name="content" placeholder="Enter song list..."></textarea>
+    <label for="content">Playlist Content (Paste your list or describe the vibe):</label>
+    <textarea id="content" name="content" placeholder="Type a vibe like: Happy, Sad, Party, Sunrise Coffee, Alone but hopeful, or Road Trip energy\n\nOr Type Across like this: Simple Man – Lynyrd Skynyrd, The Weight – The Band, Into the Mystic – Van Morrison\n\nOr Paste a song list like:\nSimple Man – Lynyrd Skynyrd\nThe Weight – The Band\nInto the Mystic – Van Morrison"></textarea>
 
-    <button type="submit">Generate Playlist</button>
+    <button type="submit">Generate</button>
   </form>
 
   <div id="result" style="margin-top: 20px;"></div>
+
+  <div class="footer">
+    ✨ Built by SS ShortStroke & Solace • SS Playlist Generator v1.1<br>
+    <span style="font-size: 12px;">for Ellie & the vibe keepers of the world</span>
+  </div>
 
   <script>
     document.getElementById('playlistForm').addEventListener('submit', async function (e) {
