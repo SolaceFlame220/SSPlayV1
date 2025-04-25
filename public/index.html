@@ -41,38 +41,40 @@
       margin-bottom: 5px;
       display: block;
     }
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border: 1px solid #333;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 255, 204, 0.15);
+  transition: box-shadow 0.3s ease;
+}
 
-    input[type="text"], textarea {
-      background-color: #2a2a2a;
-      color: #fff;
-      border: 1px solid #444;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      width: 100%;
-      margin-bottom: 20px;
-    }
+input:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+}
 
-    textarea {
-      height: 100px;
-      resize: vertical;
-    }
+button {
+  background-color: #00ffcc;
+  color: black;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 255, 204, 0.3);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
 
-    button {
-      background-color: #00ffc8;
-      color: #000;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
-    }
+button:hover {
+  background-color: #00e6b8;
+  box-shadow: 0 6px 16px rgba(0, 255, 204, 0.4);
+}
 
-    button:hover {
-      background-color: #00e6b8;
-    }
 
     #result {
       margin-top: 20px;
